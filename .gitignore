@@ -59,3 +59,9 @@ typings/
 
 # next.js build output
 .next
+
+
+# mine
+*.mp4
+*.ts
+*.m3u8

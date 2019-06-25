@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>HLS demo - player</title>
+		<script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+	</head>
+	<body>
+		<h2>HLS Demo</h2>
+		<br>
+		<video id="video" controls></video>
+
+		<script>
+			var video = document.getElementById('video');
+			if (Hls.isSupported()) {
+				console.log("hello hls.js!");
+				var hls = new Hls();
+				// bind them together
+				hls.attachMedia(video);
+				// MEDIA_ATTACHED event is fired by hls object once MediaSource is ready
+				hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+					console.log("video and hls.js are now bound together !");
+					hls.loadSource("/streams/test1_.m3u8");
+					hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+						console.log("manifest loaded, found " + data.levels.length + " quality level");
+					});
+				});
+
+				hls.on(Hls.Events.ERROR, function (event, data) {
+					if (data.fatal) {
+						switch (data.type) {
+							case Hls.ErrorTypes.NETWORK_ERROR:
+								// try to recover network error
+								console.log("fatal network error encountered, try to recover");
+								hls.startLoad();
+								break;
+							case Hls.ErrorTypes.MEDIA_ERROR:
+								console.log("fatal media error encountered, try to recover");
+								hls.recoverMediaError();
+								break;
+							default:
+								// cannot recover
+								hls.destroy();
+								break;
+						}
+					}
+				});
+			}
+		</script>
+
+		<script>/*
+			let video_src = '/public/videos/output.m3u8';
+			var video = document.getElementById('video');
+			if (Hls.isSupported()) {
+				var hls = new Hls();
+				hls.loadSource(video_src);
+				hls.attachMedia(video);
+				hls.on(Hls.Events.MANIFEST_PARSED, function () {
+					video.play();
+				});
+			}
+			// hls.js is not supported on platforms that do not have Media Source Extensions (MSE) enabled.
+			// When the browser has built-in HLS support (check using `canPlayType`), we can provide an HLS manifest (i.e. .m3u8 URL) directly to the video element through the `src` property.
+			// This is using the built-in support of the plain video element, without using hls.js.
+			// Note: it would be more normal to wait on the 'canplay' event below however on Safari (where you are most likely to find built-in HLS support) the video.src URL must be on the user-driven
+			// white-list before a 'canplay' event will be emitted; the last video event that can be reliably listened-for when the URL is not on the white-list is 'loadedmetadata'.
+			else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+				video.src = video_src;
+				video.addEventListener('loadedmetadata', function () {
+					video.play();
+				});
+			}*/
+		</script>
+	</body>
+</html>
